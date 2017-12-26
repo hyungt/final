@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.3.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing infrastructure -->
+	
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<annotation-driven />
+	<mvc:annotation-driven />
+	
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/manage/finance/*.do"/>
+			<mvc:mapping path="/manage/finance/*/*.do"/>
+			<mvc:mapping path="/manage/finance/*/*/*.do"/>
+			<mvc:mapping path="/manage/personnel/*.do"/>
+			<mvc:mapping path="/manage/personnel/*/*.do"/>
+			<mvc:mapping path="/manage/part/*.do"/>
+			<mvc:mapping path="/manage/part/*/*.do"/>
+			<mvc:mapping path="/manage/suggestion/list.do"/>
+			<mvc:mapping path="/manage/notice/*.do"/>
+			<mvc:mapping path="/manage/notice/*/*.do"/>
+			<beans:ref bean="ManageLoginCheckInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/engineer/*.do"/>
+			<mvc:mapping path="/engineer/*/*.do"/>
+			<mvc:mapping path="/suggestion/*.do"/>
+			<mvc:mapping path="/suggestion/*/*.do"/>
+			<mvc:mapping path="/notice/employee/*.do"/>
+			<mvc:mapping path="/notice/employee/*/*.do"/>
+			<beans:ref bean="EngineerLoginCheckInterceptor" />
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/user/*.do"/>
+			<mvc:mapping path="/user/*/*.do"/>
+			<mvc:mapping path="/order/purchase.do"/>
+			<mvc:mapping path="/reserve/*.do"/>
+			<mvc:mapping path="/reserve/*/*.do"/>
+			<beans:ref bean="loginCheckInterceptor"/>
+		</mvc:interceptor>
+	</mvc:interceptors>
+	
+	
+	<util:set id="urlSet">
+		<beans:value>/home.do</beans:value>
+		<beans:value>/user/idcheck.do</beans:value>
+		<beans:value>/user/add.do</beans:value>
+		<beans:value>/user/login.do</beans:value>
+		<beans:value>/user/registe.do</beans:value>
+		<beans:value>/user/home.do</beans:value>
+		<beans:value>/user/list.do</beans:value>
+	</util:set>
+	
+	<util:set id="engUrlSet">
+		<beans:value>/engineer/main.do</beans:value>
+	</util:set>
+	
+	<util:set id="manageUrlSet">
+		<beans:value>/manage/login.do</beans:value>
+	</util:set>
+	
+	<beans:bean id="loginCheckInterceptor" class="com.ese.common.interceptor.LoginCheckInterceptor">
+		<beans:property name="urlSet" ref="urlSet" />
+	</beans:bean> 
+	
+	<beans:bean id="EngineerLoginCheckInterceptor" class="com.ese.common.interceptor.EngineerLoginCheckInterceptor" >
+		<beans:property name="urlSet" ref="engUrlSet" />
+	</beans:bean> 
+	
+	<beans:bean id="ManageLoginCheckInterceptor" class="com.ese.common.interceptor.ManageLoginCheckInterceptor">
+		<beans:property name="urlSet" ref="manageUrlSet" />
+	</beans:bean>
+
+	<!-- Handles HTTP GET requests for /resources/** by efficiently serving up static resources in the ${webappRoot}/resources directory -->
+	<resources mapping="/resources/**" location="/resources/" />
+
+	<!-- 멀티파트리절브임 -->
+	<beans:bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="defaultEncoding" value="utf-8" />
+	</beans:bean>
+
+	
+
+	<!-- Resolves views selected for rendering by @Controllers to .jsp resources in the /WEB-INF/views directory -->
+	<beans:bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<beans:property name="prefix" value="/WEB-INF/views/" />
+		<beans:property name="suffix" value=".jsp" />
+		<beans:property name="order" value="2"/>
+	</beans:bean>
+	<beans:bean class="org.springframework.web.servlet.view.BeanNameViewResolver" p:order="1"/>
+	<beans:bean id="qrcodeview" class="com.ese.common.view.QRCodeGenerateView"/> 
+	<beans:bean id="filedownview" class="com.ese.common.view.FileDownloadView"/> 
+	
+	<context:property-placeholder location="classpath:/META-INF/properties/config.properties"/>
+	
+	<context:component-scan base-package="com.ese">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+	</context:component-scan>
+	
+
+</beans:beans>

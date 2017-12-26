@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.servicecenter.LocaleMapper">
+	
+	<select id="getAllLocale" resultType="Locale">
+		select
+			locale_id	as id,
+			locale_name	as name
+		from
+			sc_locale
+	</select>
+	<select id="getCitysByLocaleId" parameterType="string" resultType="City">
+		select
+			city_id		as id,
+			city_name	as name
+		from
+			sc_city
+		where
+			locale_id = #{value}
+		order by city_name
+	</select>
+	
+	<select id="getLocaleById" parameterType="string" resultType="Locale">
+		select
+			locale_id	as id,
+			locale_name	as name
+		from
+			sc_locale
+		where
+			locale_id = #{value}
+	</select>
+	
+	<select id="getCityById" parameterType="string" resultType="City">
+		select
+			city_id		as id,
+			city_name	as name
+		from
+			sc_city
+		where
+			city_id = #{value}
+	</select>
+	
+</mapper>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.manage.download.UploadMapper">
+	
+	<select id="getAllUpload" resultType="DownloadNotice">
+		select
+			A.notice_no					as	no,
+			A.notice_title				as	title,
+			A.notice_contents			as	contents,
+			A.notice_createdate			as	createdate,
+			A.notice_count				as	count,
+			A.category					as	category,
+			A.file_no					as	"attachFile.no",
+			B.file_name					as	"attachFile.name",
+			B.file_size					as	"attachFile.size",
+			B.file_createdate			as	"attachFile.createdate"
+		from
+			download_notice A, sc_file_attach B
+		where
+			A.file_no = B.file_no
+	</select>
+	
+	
+	<select id="getUploadSeq" resultType="int">
+		select seq_file.nextval from dual
+	</select>
+	
+	<select id="getFileNoSeq" resultType="int">
+		select seq_down_notice.nextval from dual
+	</select>
+	
+	<insert id="addUpload" parameterType="DownloadNotice">
+		insert into download_notice
+			(notice_no, notice_title, notice_contents, notice_createdate, notice_count, file_no, category)
+		values
+			(#{no}, #{title}, #{contents}, sysdate,  0, #{attachFile.no}, #{category})
+	</insert>
+	
+	<insert id="addFile" parameterType="FileAttach">
+		insert into sc_file_attach
+			(file_no, file_name, file_size, file_createdate)
+		values
+			(#{no}, #{name}, #{size}, sysdate)
+	</insert>
+	
+	<select id="getFileNoByName" parameterType="string" resultType="FileAttach">
+		select
+			file_no			as no,
+			file_name		as name
+		from
+			sc_file_attach
+		where
+			file_name = #{value}
+	</select>
+	
+	<select id="getUploadByNo" parameterType="int" resultType="DownloadNotice">
+		select
+			A.notice_no				as no,
+			A.notice_title			as title,
+			A.notice_contents		as contents,
+			A.notice_createdate		as createdate,
+			A.notice_count			as count,
+			A.file_no				as "attachFile.no",
+			B.file_name				as "attachFile.name",
+			B.file_size				as "attachFile.size",
+			B.file_createdate		as "attachFile.createdate",
+			A.category				as category
+		from
+			download_notice A, sc_file_attach B
+		where
+			A.file_no = B.file_no
+		and
+			A.notice_no = #{value}
+	</select>
+	
+</mapper>

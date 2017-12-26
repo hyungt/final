@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.manage.BreakApplyMapper">
+	
+	<select id="getAllBreak" resultType="BreakSign">
+		SELECT
+	      		A.SIGN_RANK					as rank,
+	      		A.SIGN_STATUS				as status,
+	      		B.BREAK_NO					as "breaks.no",
+	      		B.BREAK_APPLY				as "breaks.apply",
+	      		B.BREAK_STARTDATE			as "breaks.startdate",
+	      		B.BREAK_ENDDATE				as "breaks.enddate",
+	      		B.BREAK_REASON				as "breaks.reason",
+	      		C.EMPLOYEE_NAME				as "employee.name",
+	      		C.employee_no				as "employee.no",
+	      		D.DEPT_NAME					as "employee.department.name",
+	      		E.POSITION_NAME				as "employee.position.name",
+	      		F.CENTER_NAME				as "employee.center.name"
+	      	FROM 
+	      		BREAK_SIGN A , SC_BREAK B, SC_EMPLOYEE C, SC_DEPARTMENT D, SC_POSITION E, SC_CENTER F
+			WHERE
+				B.EMPLOYEE_NO = C.EMPLOYEE_NO
+			and
+				C.DEPT_ID = D.DEPT_ID
+		    AND	
+		    	C.POSITION_ID = E.POSITION_ID
+		    and
+		    	C.CENTER_ID = F.CENTER_ID
+		    AND
+		    	B.BREAK_NO = A.BREAK_NO
+		    and
+		    	A.sign_rank = '2'
+		    and 
+		    	A.sign_status = '대기'
+		    and
+		    	A.break_no in (select break_no from break_sign where sign_status = '완료' 
+		    						and SIGN_RANK = 1 )
+	</select>
+	
+	<select id="getBreakByDept" parameterType="string" resultType="BreakSign">
+		SELECT
+	      		A.SIGN_RANK					as rank,
+	      		A.SIGN_STATUS				as status,
+	      		B.BREAK_NO					as "breaks.no",
+	      		B.BREAK_APPLY				as "breaks.apply",
+	      		B.BREAK_STARTDATE			as "breaks.startdate",
+	      		B.BREAK_ENDDATE				as "breaks.enddate",
+	      		B.BREAK_REASON				as "breaks.reason",
+	      		C.EMPLOYEE_NAME				as "employee.name",
+	      		C.employee_no				as "employee.no",
+	      		D.DEPT_NAME					as "employee.department.name",
+	      		E.POSITION_NAME				as "employee.position.name",
+	      		F.CENTER_NAME				as "employee.center.name"
+	      	FROM 
+	      		BREAK_SIGN A, SC_BREAK B, SC_EMPLOYEE C, SC_DEPARTMENT D, SC_POSITION E, SC_CENTER F
+			WHERE
+				B.EMPLOYEE_NO = C.EMPLOYEE_NO
+			and
+				C.DEPT_ID = D.DEPT_ID
+		    AND	
+		    	C.POSITION_ID = E.POSITION_ID
+		    and
+		    	C.CENTER_ID = F.CENTER_ID
+		    AND
+		    	B.BREAK_NO = A.BREAK_NO
+		    and
+		    	C.dept_id = #{value}
+		    and 
+		    	A.sign_status = '대기'
+		    and
+		    	A.sign_rank = 2
+	    	and
+	    		A.break_no in (select break_no from break_sign where sign_status = '완료' 
+	    							and SIGN_RANK = 1 )
+	
+	</select>
+	
+	<update id="applyCompleted" parameterType="int">
+		UPDATE 
+			BREAK_SIGN
+		set 
+			SIGN_STATUS = '완료'
+		WHERE 
+		  	BREAK_NO = #{value}
+		and
+			sign_rank = 2
+	</update>
+	
+	<update id="applyComScBreak" parameterType="int">
+		update
+			sc_break
+		set
+			break_completed = 'Y'
+		where
+			break_no = #{value}
+	</update>
+	
+	<update id="applyNotCompleted" parameterType="BreakSign">
+		update
+			break_sign
+		set
+			sign_reason = #{reason},
+			sign_status = '반려'
+		where
+			break_no = #{breaks.no}
+	</update>
+	
+	<update id="notBreak" parameterType="int">
+		update
+			sc_break
+		set
+			break_completed = 'D'
+		where
+			break_no = #{value}	
+	</update>
+	
+	<select id="applyKeyword" parameterType="string" resultType="BreakSign">
+		SELECT
+	      		A.SIGN_RANK					as rank,
+	      		A.SIGN_STATUS				as status,
+	      		B.BREAK_NO					as "breaks.no",
+	      		B.BREAK_APPLY				as "breaks.apply",
+	      		B.BREAK_STARTDATE			as "breaks.startdate",
+	      		B.BREAK_ENDDATE				as "breaks.enddate",
+	      		B.BREAK_REASON				as "breaks.reason",
+	      		C.EMPLOYEE_NAME				as "employee.name",
+	      		C.employee_no				as "employee.no",
+	      		D.DEPT_NAME					as "employee.department.name",
+	      		E.POSITION_NAME				as "employee.position.name",
+	      		F.CENTER_NAME				as "employee.center.name"
+	      	FROM 
+	      		BREAK_SIGN A , SC_BREAK B, SC_EMPLOYEE C, SC_DEPARTMENT D, SC_POSITION E, SC_CENTER F
+			WHERE
+				B.EMPLOYEE_NO = C.EMPLOYEE_NO
+			and
+				C.DEPT_ID = D.DEPT_ID
+		    AND	
+		    	C.POSITION_ID = E.POSITION_ID
+		    and
+		    	C.CENTER_ID = F.CENTER_ID
+		    AND
+		    	B.BREAK_NO = A.BREAK_NO
+		    and
+		    	A.sign_rank = '2'
+		    and 
+		    	A.sign_status = '대기'
+		    and
+		    	A.break_no in (select break_no from break_sign where sign_status = '완료' 
+		    						and SIGN_RANK = 1 )
+		    <if test="value != ''">
+			<choose>
+				<when test="value != ''">
+					and C.employee_name like '%' || #{value} || '%'
+				</when>
+			</choose>
+		</if>
+	</select>
+	
+	<select id="applyDetail" parameterType="int" resultType="BreakSign">
+		SELECT
+	      		A.SIGN_RANK					as rank,
+	      		A.SIGN_STATUS				as status,
+	      		B.BREAK_NO					as "breaks.no",
+	      		B.BREAK_APPLY				as "breaks.apply",
+	      		B.BREAK_STARTDATE			as "breaks.startdate",
+	      		B.BREAK_ENDDATE				as "breaks.enddate",
+	      		B.BREAK_REASON				as "breaks.reason",
+	      		C.EMPLOYEE_NAME				as "employee.name",
+	      		C.employee_no				as "employee.no",
+	      		D.DEPT_NAME					as "employee.department.name",
+	      		E.POSITION_NAME				as "employee.position.name",
+	      		F.CENTER_NAME				as "employee.center.name"
+	      	FROM 
+	      		BREAK_SIGN A , SC_BREAK B, SC_EMPLOYEE C, SC_DEPARTMENT D, SC_POSITION E, SC_CENTER F
+			WHERE
+				B.EMPLOYEE_NO = C.EMPLOYEE_NO
+			and
+				C.DEPT_ID = D.DEPT_ID
+		    AND	
+		    	C.POSITION_ID = E.POSITION_ID
+		    and
+		    	C.CENTER_ID = F.CENTER_ID
+		    AND
+		    	B.BREAK_NO = A.BREAK_NO
+		    and
+		    	A.sign_rank = '2'
+		    and 
+		    	A.sign_status = '대기'
+		    and
+		    	A.break_no in (select break_no from break_sign where sign_status = '완료' 
+		    						and SIGN_RANK = 1 )
+		    and
+		    	A.break_no = #{value}
+	</select>
+</mapper>

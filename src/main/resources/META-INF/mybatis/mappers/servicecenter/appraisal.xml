@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.servicecenter.appraisal.AppraisalMapper">
+	<insert id="addAppraisal" parameterType="Appraisal">
+		insert into SUPPLY_APPRAISAL (APPRAISAL_NO, APPRAISAL_CONTENTS, USER_NO, PART_NO, ORDER_NO)
+		values (seq_appr.nextval, #{contents}, #{user.no}, #{part.no}, #{order.no})
+	</insert>
+	<select id="getAppraisals" parameterType="int" resultType="Appraisal">
+		select 
+			A.APPRAISAL_CONTENTS	contents,
+			A.USER_NO				"user.no",
+			B.USER_ID				"user.id"
+		from
+			SUPPLY_APPRAISAL A, SC_USER B
+		where
+			A.USER_NO = B.USER_NO
+		and
+			A.PART_NO = #{value}
+	</select>
+	<select id="getAppraisalsByUserNo" parameterType="int" resultType="Appraisal">
+		select 
+			A.APPRAISAL_CONTENTS	contents,
+			A.USER_NO				"user.no",
+			A.ORDER_NO				"order.no",
+			B.USER_ID				"user.id"
+		from
+			SUPPLY_APPRAISAL A, SC_USER B, (select
+												A.ORDER_NO
+											from	
+												SUPPLY_APPRAISAL A, SC_ORDER B
+											where
+												A.ORDER_NO = B.ORDER_NO
+											and
+												A.USER_NO = #{value})C
+		where
+			A.USER_NO = B.USER_NO
+	</select>
+	<select id="getRowsByUserNo" parameterType="int" resultType="int">
+		select
+			count(*)
+		from
+			SUPPLY_APPRAISAL
+		where
+			USER_NO = #{value}
+	</select>
+</mapper>

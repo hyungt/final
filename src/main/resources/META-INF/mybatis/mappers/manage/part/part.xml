@@ -1,0 +1,681 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.part.PartMapper">
+
+	<select id="getPartSeq" resultType="int">
+		select SEQ_PART.nextval from dual
+	</select>
+	<insert id="addPart" parameterType="Part">
+		insert into sc_part 
+			(PART_NO, PART_NAME, PART_MODEL, PART_PRICE, PART_COST, PART_QTY, PART_ID, DIVISION_ID, PART_INFO, PART_IMAGEPATH)
+		values
+			(#{no},#{name},#{modelName},#{price},#{cost},#{qty},#{partStatus.id},#{division.id},#{info},#{imagepath})
+	</insert>
+	<select id="getParts" parameterType="Division" resultType="Part">
+		select
+			A.PART_NO 			no,
+			A.PART_NAME			name,
+			A.PART_PRICE		price,
+			A.PART_COST			cost,
+			A.PART_QTY			qty,
+			B.PART_STATUS		"partStatus.status",
+			C.DIVISION_NAME		"division.name",
+			A.PART_INFO			info,
+			A.PART_IMAGEPATH	imagepath
+		from
+			sc_part A, PART_STATUS B, (select 
+											A.DIVISION_ID,
+											A.DIVISION_NAME
+										from
+											SC_DIVISION A, SC_CATEGORY B
+										where
+											A.CATEGORY_ID = B.CATEGORY_ID
+										<if test="category != null">
+											<if test="category.id == 'CAT-PH'">
+												and
+													A.CATEGORY_ID = #{category.id}
+											</if>
+											<if test="category.id == 'CAT-COM'">
+												and
+													A.CATEGORY_ID = #{category.id}
+											</if>
+											<if test="category.id == 'CAT-AP'">
+												and
+													A.CATEGORY_ID = #{category.id}
+											</if>
+											<if test="category.id == 'CAT-WE'">
+												and
+													A.CATEGORY_ID = #{category.id}
+											</if>
+											<if test="category.id == 'CAT-SD'">
+												and
+													A.CATEGORY_ID = #{category.id}
+											</if>
+										</if>
+										) C
+		where
+			A.PART_ID = B.PART_ID
+		and
+			A.DIVISION_ID = C.DIVISION_ID
+		<if test="id=='DIV-ETC'">
+		and	
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-RF'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-WA'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-CL'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-TV'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-AC'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-SWATCH'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-NOTE'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-VR'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-SM'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-TAB'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-DT'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-EA'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-SP'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		<if test="id=='DIV-HE'">
+		and
+			A.DIVISION_ID = #{id}
+		</if>
+		order by
+			A.PART_NO asc
+	</select>
+	
+	<select id="getPartsByCriteria" parameterType="ServiceCriteria" resultType="Part">
+		select
+			*
+		from (	
+			select
+				row_number() over (order by A.PART_NO desc) as rn,
+				A.PART_NO 			no,
+				A.PART_NAME			name,
+				A.PART_MODEL		modelName,
+				A.PART_PRICE		price,
+				A.PART_COST			cost,
+				A.PART_QTY			qty,
+				B.PART_STATUS		"partStatus.status",
+				C.DIVISION_NAME		"division.name",
+				A.PART_INFO			info,
+				A.PART_IMAGEPATH	imagepath
+			from
+				sc_part A, PART_STATUS B, sc_division C
+			where
+				A.part_id = B.part_id
+			and 
+				A.division_id = C.division_id
+			and
+				A.division_id = #{divisionId}
+		)
+		where
+			rn >= #{beginIndex} and rn &lt;= #{endIndex} 
+	</select>
+	
+	<select id="getTotalRowsByDivisionId" parameterType="string" resultType="int">
+		select
+			count(*)
+		from
+			sc_part
+		where
+			division_id = #{value}
+	</select>
+	
+	<select id="getPagingParts" parameterType="PartCriteria" resultType="Part">
+		select
+			PART_NO 		no,
+			PART_NAME		name,
+			PART_PRICE		price,
+			PART_COST		cost,
+			PART_QTY		qty,
+			PART_STATUS		"partStatus.status",
+			DIVISION_NAME	"division.name",
+			PART_INFO		info,
+			PART_IMAGEPATH	imagepath
+		from
+			(select
+				row_number() over (order by PART_NO  desc) rn,
+				A.PART_NO,
+				A.PART_NAME,
+				A.PART_MODEL,
+				A.PART_PRICE,
+				A.PART_COST,
+				A.PART_QTY,
+				B.PART_STATUS,
+				C.DIVISION_NAME,
+				A.PART_INFO,
+				A.PART_IMAGEPATH
+			from
+				sc_part A, PART_STATUS B, (select 
+												A.DIVISION_ID,
+												A.DIVISION_NAME
+											from
+												SC_DIVISION A, SC_CATEGORY B
+											where
+												A.CATEGORY_ID = B.CATEGORY_ID									
+											<if test="categoryId == 'CAT-PH'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-COM'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-AP'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-WE'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-SD'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											) C
+			where
+				A.PART_ID = B.PART_ID
+			and
+				A.DIVISION_ID = C.DIVISION_ID
+			<if test="divisionId=='DIV-ETC'">
+			and	
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-RF'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-WA'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-CL'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-TV'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-AC'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-SWATCH'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-NOTE'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-VR'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-SM'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-TAB'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-DT'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-EA'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-SP'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-HE'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			)
+		where
+			rn >= #{beginIndex} and rn &lt;= #{endIndex}
+		order by
+			PART_NO desc
+	</select>
+	
+	<select id="getExpendableParts" parameterType="PartCriteria" resultType="Part">
+		select
+			PART_NO 		no,
+			PART_NAME		name,
+			PART_PRICE		price,
+			PART_COST		cost,
+			PART_QTY		qty,
+			PART_STATUS		"partStatus.status",
+			DIVISION_NAME	"division.name",
+			PART_INFO		info,
+			PART_IMAGEPATH	imagepath
+		from
+			(select
+				row_number() over (order by PART_NO  desc) rn,
+				A.PART_NO,
+				A.PART_NAME,
+				A.PART_MODEL,
+				A.PART_PRICE,
+				A.PART_COST,
+				A.PART_QTY,
+				B.PART_STATUS,
+				C.DIVISION_NAME,
+				A.PART_INFO,
+				A.PART_IMAGEPATH
+			from
+				sc_part A, PART_STATUS B, (select 
+												A.DIVISION_ID,
+												A.DIVISION_NAME
+											from
+												SC_DIVISION A, SC_CATEGORY B
+											where
+												A.CATEGORY_ID = B.CATEGORY_ID									
+											<if test="categoryId == 'CAT-PH'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-COM'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-AP'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-WE'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											<if test="categoryId == 'CAT-SD'">
+												and
+													A.CATEGORY_ID = #{categoryId}
+											</if>
+											) C
+			where
+				A.PART_ID = B.PART_ID
+			and
+				A.DIVISION_ID = C.DIVISION_ID
+			<if test="divisionId=='DIV-ETC'">
+			and	
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-RF'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-WA'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-CL'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-TV'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-AC'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-SWATCH'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-NOTE'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-VR'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-SM'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-TAB'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-DT'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-EA'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-SP'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			<if test="divisionId=='DIV-HE'">
+			and
+				A.DIVISION_ID = #{divisionId}
+			</if>
+			and
+				A.PART_ID = 'PART-SALES'
+			)
+		where
+			rn >= #{beginIndex} and rn &lt;= #{endIndex}
+		order by
+			PART_NO desc
+	</select>
+	
+	<select id="getExpendableRows" parameterType="PartCriteria" resultType="int">
+		select
+			count(DISTINCT part_name)
+		from 
+			sc_part A, (select 
+							A.DIVISION_ID,
+							A.DIVISION_NAME
+						from
+							SC_DIVISION A, SC_CATEGORY B
+						where
+							A.CATEGORY_ID = B.CATEGORY_ID
+							<if test="categoryId == 'CAT-PH'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-COM'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-AP'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-WE'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-SD'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+						) B
+		where
+			A.DIVISION_ID = B.DIVISION_ID
+		<if test="divisionId=='DIV-ETC'">
+		and	
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-RF'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-WA'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-CL'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-TV'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-AC'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-SWATCH'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-NOTE'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-VR'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-SM'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-TAB'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-DT'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-EA'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-SP'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-HE'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		and
+			A.PART_ID = 'PART-SALES'
+	</select>
+	
+	<select id="getTotalRows" parameterType="PartCriteria" resultType="int">
+		select
+			count(DISTINCT part_name)
+		from 
+			sc_part A, (select 
+							A.DIVISION_ID,
+							A.DIVISION_NAME
+						from
+							SC_DIVISION A, SC_CATEGORY B
+						where
+							A.CATEGORY_ID = B.CATEGORY_ID
+							<if test="categoryId == 'CAT-PH'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-COM'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-AP'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-WE'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+							<if test="categoryId == 'CAT-SD'">
+								and
+									A.CATEGORY_ID = #{categoryId}
+							</if>
+						) B
+		where
+			A.DIVISION_ID = B.DIVISION_ID
+		<if test="divisionId=='DIV-ETC'">
+		and	
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-RF'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-WA'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-CL'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-TV'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-AC'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-SWATCH'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-NOTE'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-VR'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-SM'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-TAB'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-DT'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-EA'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-SP'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+		<if test="divisionId=='DIV-HE'">
+		and
+			A.DIVISION_ID = #{divisionId}
+		</if>
+	</select>
+	<select id="getPartByNo" parameterType="int" resultType="Part">
+		select
+			A.PART_NO 			no,
+			A.PART_NAME			name,
+			A.PART_MODEL		modelName,
+			A.PART_PRICE		price,
+			A.PART_COST			cost,
+			A.PART_QTY			qty,
+			B.PART_ID			"partStatus.id",
+			B.PART_STATUS		"partStatus.status",
+			C.DIVISION_ID		"division.id",
+			C.DIVISION_NAME		"division.name",
+			C.CATEGORY_ID		"division.category.id",
+			C.CATEGORY_NAME		"division.category.name",
+			A.PART_INFO			info,
+			A.PART_IMAGEPATH	imagepath
+		from
+			sc_part A, PART_STATUS B, (select 
+											A.DIVISION_ID,
+											A.DIVISION_NAME,
+											A.CATEGORY_ID,
+											B.CATEGORY_NAME
+										from
+											SC_DIVISION A, SC_CATEGORY B
+										where
+											A.CATEGORY_ID = B.CATEGORY_ID)C
+		where
+			A.PART_ID = B.PART_ID
+		and
+			A.DIVISION_ID = C.DIVISION_ID
+		and
+			A.PART_NO = #{value}
+	</select>
+	<select id="getAllParts" resultType="Part">
+		select
+			A.PART_NO 			no,
+			A.PART_NAME			name,
+			A.PART_MODEL		modelName,
+			A.PART_PRICE		price,
+			A.PART_COST			cost,
+			A.PART_QTY			qty,
+			B.PART_STATUS		"partStatus.status",
+			C.DIVISION_NAME		"division.name",
+			A.PART_INFO			info,
+			A.PART_IMAGEPATH	imagepath
+		from
+			sc_part A, PART_STATUS B, (select 
+											A.DIVISION_ID,
+											A.DIVISION_NAME
+										from
+											SC_DIVISION A, SC_CATEGORY B
+										where
+											A.CATEGORY_ID = B.CATEGORY_ID)C
+		where
+			A.PART_ID = B.PART_ID
+		and
+			A.DIVISION_ID = C.DIVISION_ID
+	</select>
+	<update id="updatePart" parameterType="Part">
+		update sc_part
+		<set>
+			<if test="name != null">PART_NAME = #{name},</if>
+			<if test="modelName != null">PART_MODEL = #{modelName},</if>
+			<if test="price != null">PART_PRICE = #{price},</if>
+			<if test="cost != null">PART_COST = #{cost},</if>
+			<if test="qty != null">PART_QTY = #{qty},</if>
+			<if test="partStatus.id != null">PART_ID = #{partStatus.id},</if>
+			<if test="division.id != null">DIVISION_ID = #{division.id},</if>
+			<if test="info != null">PART_INFO = #{info},</if>
+		</set>
+		where
+			part_no = #{no}
+	</update>
+</mapper>

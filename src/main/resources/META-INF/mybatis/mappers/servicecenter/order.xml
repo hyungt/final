@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.servicecenter.order.OrderMapper">
+	<select id="getOrderSeq" resultType="int">
+		select seq_order.nextval from dual
+	</select>
+	<insert id="addOrder" parameterType="Order">
+		insert into sc_order
+			(ORDER_NO, ORDER_COUNT, ORDER_PURCHASE, ORDER_ADDRESS, ORDER_ZIPCODE, ORDER_EMAIL, ORDER_PHONE, ORDER_RECIPIENT, ORDER_MESSAGE, USER_NO, PART_NO, ORDER_STATUS_ID, ORDER_DATE)
+		values
+			(#{no}, #{count}, #{purchase}, #{address}, #{zipcode}, #{email}, #{phone}, #{recipient}, #{message}, #{user.no}, #{part.no}, 'ORDER-WAIT',sysdate)
+	</insert>
+	<select id="getTotalRowsByOrderStatusId" parameterType="string" resultType="int">
+		select
+			count(*)
+		from
+			sc_order
+		where
+			ORDER_STATUS_ID = #{value}
+	</select>
+	<select id="getTotalRows" resultType="int">
+		select
+			count(*)
+		from
+			sc_order
+	</select>
+	<select id="getPagingOrders" parameterType="OrderCriteria" resultType="Order">
+		select
+			ORDER_NO	no,
+			ORDER_COUNT	count,
+			ORDER_PURCHASE	purchase,
+			ORDER_ADDRESS	address,
+			ORDER_ZIPCODE	zipcode,
+			ORDER_EMAIL		email,
+			ORDER_PHONE		phone,
+			ORDER_RECIPIENT	recipient,
+			ORDER_MESSAGE	message,
+			USER_NO			"user.no",
+			PART_NO			"part.no",
+			PART_NAME			"part.name",
+			ORDER_STATUS_ID	"statusId.id",
+			ORDER_DATE		dates
+		from
+			(select
+				row_number() over (order by ORDER_NO  desc) rn,
+				A.ORDER_NO,
+				A.ORDER_COUNT,
+				A.ORDER_PURCHASE,
+				A.ORDER_ADDRESS,
+				A.ORDER_ZIPCODE,
+				A.ORDER_EMAIL,
+				A.ORDER_PHONE,
+				A.ORDER_RECIPIENT,
+				A.ORDER_MESSAGE,
+				A.USER_NO,
+				A.PART_NO,
+				B.PART_NAME,
+				A.ORDER_STATUS_ID,
+				A.ORDER_DATE
+			from
+				sc_order A, sc_part B
+			where 
+				A.PART_NO = B.PART_NO
+				<if test="choice == 1">
+					and
+						A.ORDER_STATUS_ID = #{orderStatusId}
+				</if>
+			)
+		where
+			rn >= #{beginIndex} and rn &lt;= #{endIndex}
+		order by
+			ORDER_NO desc
+	</select>
+	<select id="getOrderByNo" parameterType="int" resultType="Order">
+		select
+			A.ORDER_NO		no,
+			A.ORDER_COUNT		count,
+			A.ORDER_PURCHASE	purchase,
+			A.ORDER_ADDRESS	address,
+			A.ORDER_ZIPCODE	zipcode,
+			A.ORDER_EMAIL		email,
+			A.ORDER_PHONE		phone,
+			A.ORDER_RECIPIENT	recipient,
+			A.ORDER_MESSAGE	message,
+			A.USER_NO			"user.no",
+			A.PART_NO			"part.no",
+			B.PART_NAME			"part.name",
+			A.ORDER_STATUS_ID	"statusId.id",
+			A.ORDER_DATE		dates
+		from
+			sc_order A, sc_part B
+		where 
+			A.PART_NO = B.PART_NO
+		and
+			ORDER_NO = #{value}
+	</select>
+	<select id="getAllOrders" resultType="Order">
+		select
+			A.ORDER_NO			no,
+			A.ORDER_COUNT		count,
+			A.ORDER_PURCHASE	purchase,
+			A.ORDER_ADDRESS		address,
+			A.ORDER_ZIPCODE		zipcode,
+			A.ORDER_EMAIL		email,
+			A.ORDER_PHONE		phone,
+			A.ORDER_RECIPIENT	recipient,
+			A.ORDER_MESSAGE		message,
+			A.USER_NO			"user.no",
+			A.PART_NO			"part.no",
+			B.PART_NAME			"part.name",
+			A.ORDER_STATUS_ID	"statusId.id",
+			A.ORDER_DATE		dates
+		from
+			sc_order A, sc_part B, ORDER_STATUS C
+		where
+			A.PART_NO = B.PART_NO
+		and
+			A.ORDER_STATUS_ID = C.ORDER_STATUS_ID
+		order by
+			A.PART_NO desc
+	</select>
+	<select id="getOrderByUser" parameterType="User" resultType="Order">
+		select
+			A.ORDER_NO			no,
+			A.ORDER_COUNT		count,
+			A.ORDER_PURCHASE	purchase,
+			A.ORDER_ADDRESS		address,
+			A.ORDER_ZIPCODE		zipcode,
+			A.ORDER_EMAIL		email,
+			A.ORDER_PHONE		phone,
+			A.ORDER_RECIPIENT	recipient,
+			A.ORDER_MESSAGE		message,
+			A.USER_NO			"user.no",
+			A.PART_NO			"part.no",
+			C.PART_NAME			"part.name",
+			A.ORDER_STATUS_ID	"statusId.id",	
+			A.ORDER_DATE		dates
+		from
+			sc_order A, sc_user B, sc_part C
+		where
+			A.PART_NO = C.PART_NO
+		and
+			A.USER_NO = B.USER_NO
+		and
+			A.USER_NO = #{no}
+	</select>
+	<update id="updateOrder" parameterType="Order">
+		update 
+			sc_order
+		set
+			ORDER_STATUS_ID = #{statusId.id}
+		where
+			ORDER_NO = #{no}
+	</update>
+</mapper>

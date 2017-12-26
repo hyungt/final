@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.servicecenter.ServicecenterMapper">
+	
+	<insert id="addUser" parameterType="User">
+		insert into sc_user
+		(user_no, user_id, user_pw, user_zipcode, user_address, user_email, user_phone, user_name)
+		values
+		(#{no}, #{id}, #{pw}, #{zipcode}, #{address}, #{email}, #{phone}, #{name})
+	</insert>
+	
+	<select id="getUserSeq" resultType="int">
+		select user_seq.nextval
+		from dual
+	</select>
+	
+	<select id="getUserByNo" parameterType="int" resultType="User" >
+		select
+			user_no			as no,
+			user_id			as	id,
+			user_pw			as	pw,
+			user_zipcode	as	zipcode,
+			user_address	as	address,	
+			user_email		as	email,
+			user_phone		as	phone,
+			user_name		as	name
+		from
+			sc_user
+		where
+			user_no = #{value}
+	</select>
+	
+	<select id="getUserById" parameterType="string" resultType="User">
+		select
+			user_no			as no,
+			user_id			as	id,
+			user_pw			as	pw,
+			user_zipcode	as	zipcode,
+			user_address	as	address,	
+			user_email		as	email,
+			user_phone		as	phone,
+			user_name		as	name
+		from
+			sc_user
+		where
+			user_id = #{value}
+	</select>
+	
+	<update id="updateInfo" parameterType="User">
+      update sc_user
+      <set>
+         <if test="pw != null">user_pw=#{pw},</if>
+         <if test="phone != null">user_phone=#{phone},</if>
+         <if test="email != null">user_email=#{email},</if>
+      </set>
+      where 
+         user_no = #{no}
+   </update>
+   
+   <select id="getOrderByUserNo" parameterType="UserOrderCriteria" resultType="Order">
+	select
+		A.ORDER_NO				as no,
+		A.ORDER_COUNT			as	count,
+		A.ORDER_PURCHASE		as	purchase,
+		A.ORDER_ADDRESS			as	address,
+		A.ORDER_ZIPCODE			as	zipcode,
+		A.ORDER_EMAIL			as	email,
+		A.ORDER_PHONE			as	phone,
+		A.ORDER_RECIPIENT		as	recipient,
+		A.ORDER_MESSAGE			as	message,
+		A.USER_NO				as	"user.no",
+		A.PART_NO				as	"part.no",
+		B.PART_NAME				as	"part.name",
+		B.PART_IMAGEPATH		as	"part.imagepath",
+		A.ORDER_STATUS_ID		as	"statusId.id",
+		C.ORDER_STATUS_TYPE		as	"statusId.type",
+		A.ORDER_DATE			as	dates
+	from
+		sc_order A, sc_part B, order_status C
+	where 
+		A.PART_NO = B.PART_NO
+	and 
+		A.ORDER_STATUS_ID = C.ORDER_STATUS_ID
+	and 
+		A.user_no = #{userNo}
+	<if test="startdate != null">
+	and 
+		to_char(A.order_date, 'yyyy-MM-dd') >= #{startdate} 	
+	</if>
+	<if test="enddate != null">
+	and
+		to_char(A.order_date, 'yyyy-MM-dd') &lt;= #{enddate}
+	</if>
+	order by A.ORDER_NO desc
+   </select>
+   
+   <select id="getTotalRowsServiceVitae" parameterType="UseServiceCriteria" resultType="int">
+   		select 
+			count(*)
+		from
+			sc_afterservice A, service_status S, sc_user U, sc_service_result B, repair_info C, service_use_part D, sc_part E
+		where
+			A.service_id = S.service_id
+		and
+			A.user_no = U.user_no
+		and 
+			A.service_no = B.service_no 
+		and 
+			C.repair_id = B.repair_id 
+		and 
+			B.result_no = D.result_no 
+		and 
+			D.part_no = E.part_no 
+		and 
+			A.user_no = #{userNo}
+   </select>
+   
+   <select id="getServiceVitaeByServiceNo" parameterType="UseServiceCriteria" resultType="ServiceResult">
+	 select
+		J.service_no				as no
+		, J.service_symptom			as "service.symptom"
+		, J.service_reservation		as "service.reservation"
+		, J.user_name				as "service.user.name"
+		, J.user_phone				as "service.user.phone"
+		, J.user_address			as "service.user.address"
+		, J.center_id				as "service.center.id"
+		, J.service_id				as "service.serviceStatus.id"
+		, J.service_status			as "service.serviceStatus.status"
+		, J.type_id					as "service.serviceType.id"
+		, J.repair_type			    as	"RepairInfo.type"
+		, J.repair_price			as	"RepairInfo.price"
+		, J.service_address			as "service.address"
+		, J.result_complete			as complete
+		, J.serviceNo				as	"service.no"
+		from	(select row_number() over (order by A.service_no desc) rn,	
+																	A.service_no				as serviceNo		
+																	, B.service_no
+																	, A.service_symptom
+																	, A.service_reservation
+																	, U.user_name
+																	, U.user_phone
+																	, U.user_address
+																	, B.result_complete	
+																	, A.center_id
+																	, A.service_id	
+																	, S.service_status
+																	, A.type_id
+																	, C.repair_type
+																	, C.repair_price
+																	, A.service_address
+																from
+																	sc_afterservice A, service_status S, sc_user U, sc_service_result B, repair_info C
+																where
+																	A.service_id = S.service_id
+																and
+																	A.user_no = U.user_no
+																and 
+																	A.service_no = B.service_no 
+																and 
+																	C.repair_id = B.repair_id 
+																and 
+																	A.user_no = #{userNo}) J
+														    where
+																rn >= #{beginIndex} and rn &lt;= #{endIndex}
+   </select>
+   
+   <select id="usingPart" parameterType="int" resultType="UsingPart">
+  SELECT 
+  	P.part_name 		as	"part.name",
+  	P.part_price		as	"part.price",
+  	A.service_no 		as	"serviceResult.no"
+FROM
+	SC_PART P, SERVICE_USE_PART SP, SC_SERVICE_RESULT R, SC_AFTERSERVICE A
+WHERE
+	P.PART_NO = SP.PART_NO
+	AND SP.RESULT_NO = R.RESULT_NO
+	AND R.SERVICE_NO = A.SERVICE_NO
+	AND A.SERVICE_NO = #{value}
+   </select>
+   
+</mapper>

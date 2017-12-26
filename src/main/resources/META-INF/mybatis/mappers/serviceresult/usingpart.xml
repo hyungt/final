@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.engineer.service.UsingPartMapper">
+	<insert id="addUsingParts" parameterType="UsingPart">
+		insert into service_use_part
+		(result_no, part_no)
+		values
+		(#{serviceResult.no}, #{part.no})
+	</insert>
+	
+	<select id="getUsingPartsByResultNo" parameterType="int" resultType="UsingPart">
+		select
+			U.result_no 		as "serviceResult.no"
+			, U.part_no			as "part.no"
+			, P.part_name		as "part.name"
+			, P.part_price		as "part.price"
+			, P.part_cost		as "part.cost"
+			, P.part_qty		as "part.qty"
+			, P.part_id			as "part.partStatus.id"
+			, PS.part_status	as "part.partStatus.status"
+			, P.division_id		as "part.division.id"
+			, D.division_name	as "part.division.name"
+			, D.category_id		as "part.division.category.id"
+			, C.category_name	as "part.division.category.name"
+			, P.part_info		as "part.info"
+			, P.part_model		as "part.modelName"
+			, P.part_imagepath	as "part.imagepath"
+		from
+			service_use_part U, sc_part P, part_status PS, sc_division D, sc_category C
+		where
+			U.part_no = P.part_no
+		and P.part_id = PS.part_id
+		and	P.division_id = D.division_id
+		and D.category_id = C.category_id
+		and U.result_no = #{value}
+	</select>
+	
+</mapper>

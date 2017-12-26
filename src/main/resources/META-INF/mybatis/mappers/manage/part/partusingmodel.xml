@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.part.PartUsingModelMapper">
+	<insert id="addPartUsingModel" parameterType="PartUsingModel">
+		insert into PART_USING_MODEL 
+			(PART_NO, PRODUCT_ID)
+		values
+			(#{part.no},#{product.id})
+	</insert>
+	
+	<select id="getPartUsingModels" parameterType="int" resultType="PartUsingModel">
+		select
+			A.PART_NO			"part.no",
+			A.PRODUCT_ID		"product.id",
+			B.PRODUCT_NAME		"product.name",
+			B.DIVISION_ID		"product.division.id",
+			B.DIVISION_NAME		"product.division.name",
+			B.CATEGORY_ID		"product.division.category.id",
+			B.CATEGORY_NAME		"product.division.category.name"
+		from
+			PART_USING_MODEL A, (select
+									A.PRODUCT_ID,
+									A.PRODUCT_NAME,
+									A.DIVISION_ID,
+									B.DIVISION_NAME,
+									B.CATEGORY_ID,
+									B.CATEGORY_NAME
+								from
+									PRODUCT_INFO A, (select
+														A.DIVISION_ID,
+														A.DIVISION_NAME,
+														A.CATEGORY_ID,
+														B.CATEGORY_NAME
+													from
+														SC_DIVISION A, SC_CATEGORY B
+													where
+														A.CATEGORY_ID = B.CATEGORY_ID
+													) B
+								where
+									A.DIVISION_ID = B.DIVISION_ID
+									) B
+		where
+			A.PRODUCT_ID = B.PRODUCT_ID
+		and
+			A.PART_NO = #{value}
+	</select>
+	
+	<delete id="delPartUsingModel" parameterType="int">
+		delete from 
+			PART_USING_MODEL
+		where
+			PART_NO = #{value}
+	</delete>
+</mapper>

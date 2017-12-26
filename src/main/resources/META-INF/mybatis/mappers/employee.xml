@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.manage.EmployeeMapper">
+	
+	<select id="getEmpSeq" resultType="int">
+		select seq_emp.nextval from dual
+	</select>
+	
+	<insert id="addEmp" parameterType="Employee">
+		insert into
+			sc_employee
+			(employee_no, employee_password, employee_email, employee_salary, employee_name, employee_phone, employee_hiredate, employee_work, center_id, dept_id, position_id, employee_pic_path)
+		values
+			(#{no}, #{password}, #{email}, #{salary}, #{name}, #{phone}, sysdate, 'Y', #{center.id}, #{department.id}, #{position.id}, #{pic})
+	</insert>
+	
+	 <select id="getAllEmp" resultType="Employee">
+      select
+         A.employee_no            as no,
+         A.employee_password      as password,
+         A.employee_email         as email,
+         A.employee_salary         as salary,
+         A.employee_name         as name,
+         A.employee_phone         as phone,
+         A.employee_hiredate      as hiredate,
+         A.employee_work         as work,
+         A.center_id			 as "center.id",
+         A.dept_id				 as	"department.id",
+         A.employee_pic_path	 as pic,
+         A.position_id			 as "position.id", 
+         C.center_name            as "center.name",
+         B.dept_name               as "department.name",
+         D.position_name            as "position.name"
+      from
+         sc_employee A , sc_department B, sc_center C, sc_position D
+      where
+      	 A.dept_id = B.dept_id
+      and
+      	 A.center_id = C.center_id
+      and
+      	 A.position_id = D.position_id 
+      and
+      	 A.employee_work = 'Y'
+      order by employee_no
+   </select>
+   
+   <select id="getByDetpId" parameterType="string" resultType="Employee">
+   		select
+         A.employee_no            as no,
+         A.employee_password      as password,
+         A.employee_email         as email,
+         A.employee_salary         as salary,
+         A.employee_name         as name,
+         A.employee_phone         as phone,
+         A.employee_hiredate      as hiredate,
+         A.employee_work         as work,
+         A.center_id			 as "center.id",
+         A.employee_pic_path	 as pic,
+         A.dept_id				 as	"department.id",
+         A.position_id			 as "position.id", 
+         C.center_name            as "center.name",
+         B.dept_name               as "department.name",
+         D.position_name            as "position.name"
+      from
+         sc_employee A , sc_department B, sc_center C, sc_position D
+      where
+      	 A.dept_id = B.dept_id
+      and
+      	 A.center_id = C.center_id
+      and
+      	 A.position_id = D.position_id 
+      and
+      	 A.dept_id = #{value}
+   </select>
+   
+   <select id="getByKeyword" parameterType="string" resultType="Employee">
+   	  select
+         A.employee_no            as no,
+         A.employee_password      as password,
+         A.employee_email         as email,
+         A.employee_salary         as salary,
+         A.employee_name         as name,
+         A.employee_phone         as phone,
+         A.employee_hiredate      as hiredate,
+         A.employee_work         as work,
+         A.center_id			 as "center.id",
+         A.employee_pic_path	 as pic,
+         A.dept_id				 as	"dept_id",
+         A.position_id			 as "position.id", 
+         C.center_name            as "center.name",
+         B.dept_name               as "department.name",
+         D.position_name            as "position.name"
+      from
+         sc_employee A , sc_department B, sc_center C, sc_position D
+      where
+      	 A.dept_id = B.dept_id
+      and
+      	 A.center_id = C.center_id
+      and
+      	 A.position_id = D.position_id 
+      	 <if test="value != ''">
+			<choose>
+				<when test="value != ''">
+					and A.employee_name like '%' || #{value} || '%'
+				</when>
+			</choose>
+		</if>
+   </select>
+   
+   <select id="getAllCenter" resultType="Center">
+   		select
+   			center_id			as id,
+   			center_address		as address,
+   			center_name			as name
+   		from
+   			sc_center
+   </select>
+
+   
+	<select id="getEmployeeByCenterId" parameterType="string" resultType="Employee">
+		select
+			A.employee_no           as no,
+			A.employee_name         as name,
+			A.employee_phone		as phone,
+			A.employee_work			as work,
+			A.employee_email		as email,
+			A.employee_hiredate		as hiredate,
+			A.center_id				as "center.id",
+			A.dept_id				as "department.id",
+			A.employee_pic_path		as pic,
+			A.position_id			as "position.id", 
+			C.center_name           as "center.name",
+			B.dept_name             as "department.name",
+			D.position_name         as "position.name"
+		from
+			sc_employee A , sc_department B, sc_center C, sc_position D
+		where
+			A.dept_id = B.dept_id
+		and
+			A.center_id = C.center_id
+		and
+			A.position_id = D.position_id
+		and
+			A.center_id = #{value}
+		and
+			A.dept_id = 'DEPT-SC'
+		and
+			A.position_id != 'POS-CM'
+		and
+			A.employee_work	= 'Y'
+	</select>
+
+	<select id="getByDeptHoilday" parameterType="string" resultType="Employee">
+		select
+			A.employee_no            as no,
+	         A.employee_password      as password,
+	         A.employee_email         as email,
+	         A.employee_salary         as salary,
+	         A.employee_name         as name,
+	         A.employee_phone         as phone,
+	         A.employee_hiredate      as hiredate,
+	         A.employee_work         as work,
+	         A.center_id			 as "center.id",
+	         A.dept_id				 as	"department.id",
+	         A.employee_pic_path	 as pic,
+	         A.position_id			 as "position.id", 
+	         C.center_name            as "center.name",
+	         B.dept_name               as "department.name",
+	         D.position_name            as "position.name"
+	      from
+	         sc_employee A , sc_department B, sc_center C, sc_position D, sc_break E
+	      where
+	      	 A.dept_id = B.dept_id
+	      and
+	      	 A.center_id = C.center_id
+	      and
+	      	 A.position_id = D.position_id 
+	      and
+	      	 A.employee_no = E.employee_no
+	      and
+	      	A.dept_id = #{value}
+	      and
+	      	E.break_completed = 'Y'
+	      and
+	      	E.break_enddate > sysdate
+			
+	</select>
+	
+	<select id="getAllDeptHoilday" resultType="Employee">
+		select
+			A.employee_no            as no,
+	         A.employee_password      as password,
+	         A.employee_email         as email,
+	         A.employee_salary         as salary,
+	         A.employee_name         as name,
+	         A.employee_phone         as phone,
+	         A.employee_hiredate      as hiredate,
+	         A.employee_work         as work,
+	         A.center_id			 as "center.id",
+	         A.dept_id				 as	"department.id",
+	         A.employee_pic_path	 as pic,
+	         A.position_id			 as "position.id", 
+	         C.center_name            as "center.name",
+	         B.dept_name               as "department.name",
+	         D.position_name            as "position.name"
+	      from
+	         sc_employee A , sc_department B, sc_center C, sc_position D, sc_break E
+	      where
+	      	 A.dept_id = B.dept_id
+	      and
+	      	 A.center_id = C.center_id
+	      and
+	      	 A.position_id = D.position_id 
+	      and
+	      	 A.employee_no = E.employee_no
+	      and
+	      	E.break_completed = 'Y'
+	      and
+	      	E.break_enddate > sysdate
+			
+	</select>
+	
+	<select id="findKeyword" parameterType="string" resultType="Employee">
+		select
+			A.employee_no            as no,
+	         A.employee_password      as password,
+	         A.employee_email         as email,
+	         A.employee_salary         as salary,
+	         A.employee_name         as name,
+	         A.employee_phone         as phone,
+	         A.employee_hiredate      as hiredate,
+	         A.employee_work         as work,
+	         A.center_id			 as "center.id",
+	         A.dept_id				 as	"department.id",
+	         A.employee_pic_path	 as pic,
+	         A.position_id			 as "position.id", 
+	         C.center_name            as "center.name",
+	         B.dept_name               as "department.name",
+	         D.position_name            as "position.name"
+	      from
+	         sc_employee A , sc_department B, sc_center C, sc_position D, sc_break E
+	      where
+	      	 A.dept_id = B.dept_id
+	      and
+	      	 A.center_id = C.center_id
+	      and
+	      	 A.position_id = D.position_id 
+	      and
+	      	 A.employee_no = E.employee_no
+	      and
+	      	E.break_completed = 'Y'
+	      and
+	      	E.break_enddate > sysdate
+	      <if test="value != ''">
+			<choose>
+				<when test="value != ''">
+					and A.employee_name like '%' || #{value} || '%'
+				</when>
+			</choose>
+		</if>
+			
+	</select>
+	
+	<select id="getEmpById" parameterType="string" resultType="Employee">
+	select
+         A.employee_no            as no,
+         A.employee_password      as password,
+         A.employee_email         as email,
+         A.employee_salary         as salary,
+         A.employee_name         as name,
+         A.employee_phone         as phone,
+         A.employee_hiredate      as hiredate,
+         A.employee_work         as work,
+         A.center_id			 as "center.id",
+         A.employee_pic_path	 as pic,
+         A.dept_id				 as	"department.id",
+         A.position_id			 as "position.id", 
+         C.center_name            as "center.name",
+         B.dept_name               as "department.name",
+         D.position_name            as "position.name"
+      from
+         sc_employee A , sc_department B, sc_center C, sc_position D
+      where
+      	 A.dept_id = B.dept_id
+      and
+      	 A.center_id = C.center_id
+      and
+      	 A.position_id = D.position_id 
+      and
+      	 A.employee_email = #{value}
+	</select>
+	
+	<update id="changeEmp" parameterType="Employee">
+		update
+			sc_employee
+		set
+			employee_password = #{password},
+			employee_pic_path = #{pic},
+			employee_phone	  = #{phone}
+		where
+			employee_no = #{no}
+	</update>
+	
+</mapper>

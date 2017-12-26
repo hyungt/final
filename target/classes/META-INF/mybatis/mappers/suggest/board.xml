@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.ese.mappers.notice.SuggestBoardMapper">
+	<select id="getTotalRows" parameterType="Pagination" resultType="int">
+			select
+				count(*)
+			from
+				(select
+					A.suggest_no				as no,
+					A.suggest_title				as title,	
+					A.suggest_contents			as contents,
+					A.suggest_parentno			as parentNo,
+					A.suggest_createdate		as createdate,
+					A.employee_no				as "employee.no",
+					C.dept_name			as "employee.department.name",
+					(select count(*) from suggest_board where suggest_no != suggest_parentno and A.suggest_no = suggest_parentno) 	as conf
+				from
+					suggest_board A , sc_employee B, sc_department C
+				where
+					A.suggest_no = A.suggest_parentno
+				and
+					A.employee_no = B.employee_no
+				and
+					B.dept_id = C.dept_id
+				<if test="keyword != ''">
+					<choose>
+						<when test="opt == 'title'">
+							and A.suggest_title like '%' || #{keyword} || '%'
+						</when>
+						<when test="opt == 'contents'">
+							and A.suggest_contents like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</if>
+					)
+			<if test="oppt != ''">
+				where
+				<if test="oppt eq 'all'">
+					conf in (1,0)
+				</if>
+				<if test="oppt eq 'comp'">
+					conf = 1			
+				</if>
+				<if test="oppt eq 'incomp'">
+					conf = 0
+				</if>
+			</if>
+	</select>
+
+	<select id="getAllBoards" parameterType="Pagination" resultType="Suggest">
+		select
+			suggest_no				as no,
+			suggest_title			as title,
+			suggest_contents		as contents,
+			suggest_parentno		as parentNo,
+			suggest_createdate		as createdate,
+			employee_no				as "employee.no"
+		from
+			(
+			select
+				row_number() over (order by suggest_parentno desc, suggest_no asc) rn,
+				suggest_no				,
+				suggest_title			,
+				suggest_contents		,
+				suggest_parentno		,
+				suggest_createdate		,
+				employee_no				
+			from
+				suggest_board
+			<where>
+				<if test="keyword != ''">
+					<choose>
+						<when test="opt == 'title'">
+							and suggest_title like '%' || #{keyword} || '%'
+						</when>
+						<when test="opt == 'contents'">
+							and suggest_contents like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</if>
+			</where>
+			order by suggest_parentno desc, suggest_no asc		
+			)
+		where rn >= #{beginIndex} and rn &lt;= #{endIndex}
+	</select>
+	
+	<select id="getByResult" resultType="Suggest" parameterType="Pagination">
+			select 
+				suggest_no				as no, 
+				suggest_title			as title, 
+				suggest_contents		as contents , 
+				suggest_parentno 		as parentNo, 
+				suggest_createdate 		as createdate,	 
+				employee_no 			as "employee.no", 
+				dept_name  				as "employee.department.name", 
+				conf
+		from (
+				SELECT 
+					suggest_no, 
+					suggest_title, 
+					suggest_contents, 
+					suggest_parentno, 
+					suggest_createdate,	 
+					employee_no, 
+					dept_name, 
+					conf,
+					row_number() over (order by suggest_no desc) rn
+				from(
+						select
+							A.suggest_no	,
+							A.suggest_title	,
+							A.suggest_contents,	
+							A.suggest_parentno,
+							A.suggest_createdate,	
+							A.employee_no		,
+							C.dept_name		,
+							(select count(*) from suggest_board where suggest_no != suggest_parentno and A.suggest_no = suggest_parentno) conf
+						from 
+							suggest_board A , sc_employee B, sc_department C
+						where 
+							A.suggest_no = A.suggest_parentno
+						and 
+							A.employee_no = B.employee_no
+						and 
+							B.dept_id = C.dept_id
+							<if test="keyword != ''">
+								<choose>
+									<when test="opt == 'title'">
+										and A.suggest_title like '%' || #{keyword} || '%'
+									</when>
+									<when test="opt == 'contents'">
+										and A.suggest_contents like '%' || #{keyword} || '%'
+									</when>
+								</choose>
+							</if>
+					) 
+				<if test="oppt != ''">
+				where
+				<if test="oppt eq 'all'">
+					conf in (1,0)
+				</if>
+				<if test="oppt eq 'comp'">
+					conf = 1			
+				</if>
+				<if test="oppt eq 'incomp'">
+					conf = 0
+				</if>
+				</if>
+				)
+		where 
+			rn >= #{beginIndex} and rn &lt;= #{endIndex}
+	</select>
+	
+	<select id="getBoardByNo" parameterType="int" resultType="Suggest">
+		select
+			A.suggest_no			as no,
+			A.suggest_title			as title,
+			A.suggest_contents		as contents,
+			A.suggest_parentno		as parentNo,
+			A.suggest_createdate	as createdate,
+			A.employee_no			as "employee.no",
+			C.dept_name				as "employee.department.name",
+			(select count(*) from suggest_board where suggest_no != suggest_parentno and A.suggest_no = suggest_parentno) conf
+		from
+			suggest_board A, sc_employee B, sc_department C
+		where
+			suggest_no = #{value}
+		and
+			A.employee_no = B.employee_no
+		and
+			B.dept_id = C.dept_id
+	</select>
+	
+	<select id="detailComment" parameterType="int" resultType="Suggest">
+		select
+			A.suggest_no				as no, 
+			A.suggest_title				as title, 
+			A.suggest_contents			as contents , 
+			A.suggest_parentno 			as parentNo, 
+			A.suggest_createdate 		as createdate,	 
+			B.employee_no 				as "employee.no", 
+			C.dept_name  				as "employee.department.name"
+		from 
+			suggest_board A , sc_employee B, sc_department C
+		where 
+			A.employee_no = B.employee_no
+		and 
+			B.dept_id = C.dept_id
+		and
+			A.SUGGEST_PARENTNO = #{value}
+		AND
+			A.SUGGEST_NO != A.SUGGEST_PARENTNO
+	</select>
+	
+	
+	<insert id="addBoard" parameterType="Suggest">
+		insert into suggest_board
+			(suggest_no, suggest_title, suggest_contents, suggest_parentno, suggest_createdate, employee_no)
+		values
+			(#{no}, #{title}, #{contents}, #{parentNo}, sysdate, #{employee.no})
+	</insert>
+	
+	<insert id="reply" parameterType="Suggest">
+		insert into suggest_board
+			(suggest_no, suggest_title, suggest_contents, suggest_parentno, suggest_createdate, employee_no)
+		values
+			(#{no}, #{title}, #{contents}, #{parentNo}, sysdate, #{employee.no})
+	</insert>
+	
+	<select id="getSeq" resultType="int">
+		select seq_suggest.nextval from dual
+	</select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.servicecenter.CenterMapper">
+	
+	<select id="getCenterList" resultType="Center">
+		select
+			center_id		as "id",
+			center_address	as "address",
+			center_name		as "name"
+		from
+			sc_center
+		order by center_address
+	</select>
+	<select id="getCenter" parameterType="string" resultType="Center">
+		select
+			center_id		as "id",
+			center_address	as "address",
+			center_name		as "name"
+		from
+			sc_center
+		where
+			center_id = #{value}
+	</select>
+	
+	<select id="getCenterByLocale" parameterType="string" resultType="Center">
+		select
+			center_id		as "id",
+			center_address	as "address",
+			center_name		as "name"
+		from
+			sc_center
+		where
+			center_address like ('%'||#{value}||'%')
+	</select>
+	
+</mapper>

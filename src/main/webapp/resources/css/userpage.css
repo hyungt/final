@@ -1,0 +1,113 @@
+@charset "UTF-8";
+
+#div1,#div2,#div3,#div4{
+        height: 400px;
+    }
+    #div1 {background-image: url('/resources/images/main/usermypage/note.PNG'); color: white;}
+    #div2 {background-image: url('/resources/images/main/usermypage/a07.jpg'); }
+    #div3 {background-image: url('/resources/images/main/usermypage/order.PNG'); }
+    #div4 {background-image: url('/resources/images/main/usermypage/center.PNG'); background-position: center; background-repeat: no-repeat; }
+     #div3,#div4{
+        margin-top: -18px;
+    }
+     #div11{
+        position: absolute;
+        margin-top:0.2%;
+        width: 40.6%;
+        height:63%;
+        margin-left: 11%;
+        z-index: 100;
+        display: none;
+    }
+    #div22{
+        position: absolute; margin-top:0.7%; width: 40.6%; margin-left: 11%; z-index: 100; display: none; font-weight: bold; color: white; border: 1px solid; 
+        border-color: #0C70BC; }
+    
+    #div11 button{
+        margin-top: 75%;
+        margin-left: 93%;
+    }
+    #cancelAndread{
+        margin-top: 10%;
+        margin-left: 35%;
+    }
+    #div33{
+       position: absolute;
+        width: 40%;
+        height:67%;
+        z-index: 100;
+        display: none;
+        background-color: white; border: 1px solid; border-color: #0C70BC;
+    }
+    #div33 button{
+        margin-left: 90%;
+    }
+    #div44{
+        position: absolute;
+        margin-top:0.7%;
+        width: 40.6%;
+        height:81%;
+        margin-left: 11%;
+        z-index: 10;
+        display: none;
+        background-color: white; border: 1px solid; border-color: #0C70BC;
+    }
+    #div44 button{
+        margin-left:89%;
+    }
+    
+    #bookLogo{
+        padding-top: 30%;
+        padding-left: 10%;
+    }
+    #absol{
+        position: relative;
+    }
+    #tablea{
+        position: relative;
+    }
+    #div10,#div12,#div13{
+        z-index: -1;
+        display: none;
+        float:left;
+    }
+    
+    #searchBtn{
+        position: relative;
+        top: -20px;
+        width: 200%;
+        padding-left: 
+        
+    }
+    #startDate{
+        margin-left: 10%;
+        width: 50%;
+    }
+    #dateForm span{
+    }
+    #endDate{
+        width:50%;	
+    }
+    #table-area { 
+        width: 100%; 
+        height: 400px; 
+        overflow-y: scroll;
+        margin-bottom: 5%;
+    }
+    #part thead tr th {text-align: center;}
+    #table-area th{
+        text-align: center;
+    }
+    #joomoonTable img{
+        width: 40%;	
+        height: 35%;
+        padding-right: 5%;
+    }
+    #part thead tr th {text-align: center; }
+	#part tbody tr td {vertical-align: middle;}
+    #div3 h3 {width: 170px; background-color: white; padding-top: 10px; margin-top: -10px; padding-bottom: 10px;}
+    #modify {background-color: #0C70BC; padding-top: 10px; padding-bottom: 10px;}
+    #cancelAndread {padding-bottom: 10px;}
+    #product td {vertical-align: middle; text-align: center;}
+    #dateSearch {position: relative; margin-left: 30%; margin-bottom: 4%; }
+    #modifyForm {color: black;}

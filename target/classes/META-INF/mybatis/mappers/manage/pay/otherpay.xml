@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.pay.OtherPayMapper">
+	
+	<insert id="addOtherPay" parameterType="OtherPay">
+		insert into other_pay
+		(other_pay_no, other_pay_reason, other_pay_cost, dept_id, other_pay_date)
+		values
+		(seq_other.nextval, #{reason}, #{cost}, #{department.id}, sysdate)
+	</insert>
+	
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.engineer.service.ServiceResultMapper">
+	<insert id="addServiceResult" parameterType="ServiceResult">
+		insert into sc_service_result
+			(result_no, service_no, repair_id, result_complete)
+		values
+			(#{no}, #{service.no}, #{repairInfo.id}, sysdate)
+	</insert>
+	<select id="getServiceResultByServiceNo" parameterType="int" resultType="ServiceResult">
+		select
+			result_no			as "no"
+			, result_complete 	as "complete"
+			, service_no		as "service.no"
+			, repair_id			as "repairInfo.id"
+		from
+			sc_service_result
+		where
+			service_no = #{value}
+	</select>
+	<select id="getSeqResult" resultType="int">
+		select seq_service_result.nextval from dual
+	</select>
+</mapper>

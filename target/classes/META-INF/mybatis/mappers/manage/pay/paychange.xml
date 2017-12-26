@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.pay.PayChangeMapper">
+	
+	<insert id="addPayChange" parameterType="PayChange">
+		insert into pay_change
+		(pay_no, pay_money, pay_type, pay_changedate, pay_etc_reason, change_type_id)
+		values
+		(seq_pay.nextval, #{money}, #{type}, sysdate, #{reason,jdbcType=VARCHAR}, #{changeType.id})
+	</insert>
+	
+	<select id="getDayChartData" parameterType="hashmap" resultType="ChartResult" >
+		with tmp
+		as(
+			select 
+			<choose>
+				<when test="type.equals('year')">
+					to_char(add_months(to_date(#{startMonth}, 'yyyy-MM') , level - 1), 'yyyy-mm') as "day"
+				</when>
+				<otherwise>
+					to_char(to_date(#{startDate}, 'yyyy-MM-dd') + level - 1, 'yyyy-mm-dd') as "day"
+				</otherwise>
+			</choose>
+			from
+				dual
+			connect by level &lt;= #{dayGap}
+		)
+		select
+			B."day"					as "day",
+			nvl(A.income, 0)		as "income",
+			nvl(A.expenditure, 0)	as "expenditure"
+		from
+		(select
+			Y."day"					as "day",
+			nvl(X.income, 0)		as income,
+			nvl(X.expenditure, 0) 	as expenditure
+		from
+			(select
+				A.id			"day1",
+				B.id			"day2",
+				A.income		income,
+				B.expenditure	expenditure
+			from
+			(
+				select
+					<choose>
+						<when test="type.equals('year')">
+							to_char(PAY_CHANGEDATE, 'yyyy-MM') 	id,
+						</when>
+						<otherwise>
+							to_char(PAY_CHANGEDATE, 'yyyy-MM-dd') 	id,
+						</otherwise>
+					</choose>
+					sum(pay_money) income
+				from
+					PAY_CHANGE
+				where
+					PAY_CHANGEDATE >= to_date(#{startDate}||' 00:00:00', 'yyyy-MM-dd HH24:mi:ss')
+				and
+					PAY_CHANGEDATE &lt;= to_date(#{endDate}||' 23:59:59', 'yyyy-MM-dd HH24:mi:ss')
+				and
+					PAY_TYPE = '수입'
+				group by
+				<choose>
+					<when test="type.equals('year')">
+						to_char(PAY_CHANGEDATE, 'yyyy-MM'), PAY_TYPE
+					</when>
+					<otherwise>
+						to_char(PAY_CHANGEDATE, 'yyyy-MM-dd'), PAY_TYPE
+					</otherwise>
+				</choose>
+			) A full outer join (
+				select
+					<choose>
+						<when test="type.equals('year')">
+							to_char(PAY_CHANGEDATE, 'yyyy-MM') 	id,
+						</when>
+						<otherwise>
+							to_char(PAY_CHANGEDATE, 'yyyy-MM-dd') 	id,
+						</otherwise>
+					</choose>
+					sum(pay_money) expenditure
+				from
+					PAY_CHANGE
+				where
+					PAY_CHANGEDATE >= to_date(#{startDate}||' 00:00:00', 'yyyy-MM-dd HH24:mi:ss')
+				and
+					PAY_CHANGEDATE &lt;= to_date(#{endDate}||' 23:59:59', 'yyyy-MM-dd HH24:mi:ss')
+				and
+					PAY_TYPE = '지출'
+				group by
+				<choose>
+					<when test="type.equals('year')">
+						to_char(PAY_CHANGEDATE, 'yyyy-MM'), PAY_TYPE
+					</when>
+					<otherwise>
+						to_char(PAY_CHANGEDATE, 'yyyy-MM-dd'), PAY_TYPE
+					</otherwise>
+				</choose>
+			) B on (A.id = B.id)
+			) X, TMP Y
+		where
+			(X."day1" = Y."day"
+		or
+			X."day2" = Y."day")
+		)A, TMP B
+		where
+			A."day"(+) = B."day"
+		order by B."day"
+	</select>
+	
+	<select id="getTypeChartData" parameterType="hashmap" resultType="ChartResult">
+		SELECT
+			CT.CHANGE_TYPE_INFO			AS "TYPE",
+			NVL(R.INCOME, 0)			AS INCOME,
+			NVL(R.EXPENDITURE, 0)		AS EXPENDITURE
+		FROM
+		PAY_CHANGE_TYPE CT, 
+		(SELECT
+			CT.CHANGE_TYPE_ID			AS "TYPE",
+			M.INCOME					AS INCOME,
+			M.EXPENDITURE				AS EXPENDITURE
+		FROM
+			PAY_CHANGE_TYPE CT, 
+		(SELECT
+			A.CHANGE_TYPE_ID			AS "TYPE1",
+			B.CHANGE_TYPE_ID			AS "TYPE2",
+			A.INCOME					AS "INCOME",
+			B."EXPENDITURE"				AS "EXPENDITURE"
+		FROM
+			(select
+				CHANGE_TYPE_ID,
+				sum(pay_money) income
+			from
+				PAY_CHANGE
+			where
+				PAY_CHANGEDATE >= to_date(#{startDate}||' 00:00:00', 'yyyy-MM-dd HH24:mi:ss')
+			and
+				PAY_CHANGEDATE &lt;= to_date(#{endDate}||' 23:59:59', 'yyyy-MM-dd HH24:mi:ss')
+			and
+				PAY_TYPE = '수입'
+			group by
+				CHANGE_TYPE_ID) A
+		FULL OUTER JOIN
+			(select
+				CHANGE_TYPE_ID,
+				sum(pay_money) "EXPENDITURE"
+			from
+				PAY_CHANGE
+			where
+				PAY_CHANGEDATE >= to_date(#{startDate}||' 00:00:00', 'yyyy-MM-dd HH24:mi:ss')
+			and
+				PAY_CHANGEDATE &lt;= to_date(#{endDate}||' 23:59:59', 'yyyy-MM-dd HH24:mi:ss')
+			and
+				PAY_TYPE = '지출'
+			group by
+				CHANGE_TYPE_ID) B 
+		ON (A.CHANGE_TYPE_ID = B.CHANGE_TYPE_ID)) M
+		WHERE
+			(CT.CHANGE_TYPE_ID = M."TYPE1"
+			OR
+			CT.CHANGE_TYPE_ID = M."TYPE2")) R
+		WHERE
+			CT.CHANGE_TYPE_ID = R."TYPE"(+)
+	</select>
+	
+	<select id="getPayChanges" parameterType="PayChangeType" resultType="PayChange">
+		select
+			PC.pay_no				as "no"
+			, PC.pay_money			as "money"
+			, PC.pay_type			as "type"
+			, PC.pay_changedate		as "changedate"
+			, PC.pay_etc_reason		as "reason"
+			, PC.change_type_id		as "changeType.id"
+			, CT.change_type_info	as "changeType.info"
+		from
+			pay_change PC, pay_change_type CT
+		where
+			PC.change_type_id = CT.change_type_id
+		<if test="id != null">
+			AND	PC.change_type_id = #{id}
+		</if>
+	</select>
+	
+	<select id="getAllPayChangeType" resultType="PayChangeType">
+		select
+			change_type_id		as "id"
+			, change_type_info	as "info"
+		from
+			pay_change_type
+		order by change_type_id
+	</select>
+	
+	<select id="getChangeByCriteria" parameterType="PayChangeCriteria" resultType="PayChange">
+		select
+			PC.pay_no				as "no"
+			, PC.pay_money			as "money"
+			, PC.pay_type			as "type"
+			, PC.pay_changedate		as "changedate"
+			, PC.pay_etc_reason		as "reason"
+			, PC.change_type_id		as "changeType.id"
+			, CT.change_type_info	as "changeType.info"
+		from
+			pay_change PC, pay_change_type CT
+		where
+			PC.change_type_id = CT.change_type_id
+		<if test='startDate != null and startDate != ""'>
+			and 
+				PC.pay_changedate > to_date(#{startDate}||' 00:00:00', 'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test='endDate != null and endDate != ""'>
+			and
+				PC.pay_changedate &lt;= to_date(#{endDate}||' 23:59:59', 'yyyy-MM-dd HH24:mi:ss')
+		</if>
+		<if test="changeType !='all'">
+			and
+				PC.change_type_id = #{changeType}
+		</if>
+		<if test="type != 'all'">
+			and
+				PC.pay_type = #{type}
+		</if>
+		order by PC.pay_changedate
+	</select>
+	
+</mapper>

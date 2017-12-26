@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:websocket="http://www.springframework.org/schema/websocket"
+	xsi:schemaLocation="http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+	
+	<!-- Root Context: defines shared resources visible to all other web components -->
+	<context:annotation-config/>
+	<context:component-scan base-package="com.ese">
+		<context:include-filter type="annotation" expression="org.springframework.stereotype.Service"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+		<context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+	</context:component-scan>
+	
+	
+	<bean id="DayResultDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="DayResult" />
+		<property name="targetMethod" value="dayResultBatch" />
+	</bean>
+	
+	<bean id="trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="DayResultDetail"/>
+		<property name="cronExpression" value="0 0 15 * * ?" />
+	</bean>
+	
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="jobDetails">
+			<list>
+				<ref bean="DayResultDetail" />
+			</list>
+		</property>
+		<property name="triggers">
+			<list>
+				<ref bean="trigger" />
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="courseWebSocketHandler" class="com.ese.common.webSocket.AuthorizationWebSocketHandler"/>
+		
+	<websocket:handlers>
+		<websocket:mapping handler="courseWebSocketHandler" path="/authorization/verifyConnect.do"/><!-- path에 등록된 주소로 요청이 오면 웹소켓 연결을 실행한다. -->
+		<websocket:handshake-interceptors>
+			<bean class="com.ese.common.webSocket.WebSocketHandshakeInterceptor" />
+		</websocket:handshake-interceptors>
+	</websocket:handlers>
+	
+</beans>

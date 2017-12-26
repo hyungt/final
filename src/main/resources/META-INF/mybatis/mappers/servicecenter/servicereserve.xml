@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ese.mappers.servicecenter.ServiceReserveMapper">
+		
+	<select id="getTotalServiceRows" resultType="int">
+		select count(*) from sc_afterservice
+	</select>
+	
+	<select id="getAfterServiceSeq" resultType="int">
+		select seq_service.nextval from dual
+	</select>
+	
+	<select id="getServiceByNo" parameterType="int" resultType="Service">
+		select
+			A.service_no				as "no"
+			, A.service_symptom			as "symptom"
+			, A.service_reservation		as "reservation"
+			, A.user_no					as "user.no"
+			, U.user_name				as "user.name"
+			, U.user_phone				as "user.phone"
+			, U.user_address			as "user.address"
+			, A.employee_no				as "employee.no"
+			, E.employee_name			as "employee.name"
+			, A.center_id				as "center.id"
+			, C.center_name				as "center.name"
+			, A.division_id				as "division.id"
+			, D.division_name			as "division.name"
+			, A.service_id				as "serviceStatus.id"
+			, S.service_status			as "serviceStatus.status"
+			, A.type_id					as "serviceType.id"
+			, T.type_name				as "serviceType.name"
+			, A.service_address			as "address"
+		from
+			sc_afterservice A, service_status S, service_type T, sc_user U, sc_division D, sc_employee E, sc_center C
+		where
+			A.service_no = #{value}
+		AND
+			A.service_id = S.service_id
+		AND
+			A.type_id = T.type_id
+		AND
+			A.user_no = U.user_no
+		AND
+			A.division_id = D.division_id
+		AND
+			A.employee_no = E.employee_no
+		AND
+			A.center_id = C.center_id
+		
+	</select>
+	
+	<select id="getTotalRowsServiceUser" parameterType="UseServiceCriteria" resultType="int">
+   		select 
+			count(*)
+		from
+			sc_afterservice A, service_status S, service_type T, sc_user U, sc_employee E, sc_center C
+		where
+			A.service_id = S.service_id
+		AND
+			A.type_id = T.type_id
+		AND
+			A.user_no = U.user_no
+		AND
+			A.employee_no = E.employee_no
+		AND
+			A.center_id = C.center_id
+		AND 
+			U.user_no = #{userNo}
+   </select>
+	
+	<select id="getServiceByUserNo" parameterType="UseServiceCriteria" resultType="Service">
+	select
+		J.service_no				as "no"
+		, J.service_symptom			as "symptom"
+		, J.service_reservation		as "reservation"
+		, J.user_no					as "user.no"
+		, J.user_name				as "user.name"
+		, J.user_phone				as "user.phone"
+		, J.user_address			as "user.address"
+		, J.employee_no				as "employee.no"
+		, J.employee_name			as "employee.name"
+		, J.center_id				as "center.id"
+		, J.center_name				as "center.name"
+		, J.service_id				as "serviceStatus.id"
+		, J.service_status			as "serviceStatus.status"
+		, J.type_id					as "serviceType.id"
+		, J.type_name				as "serviceType.name"
+	from	(select row_number() over (order by A.service_no desc) rn,	
+												A.service_no
+												, A.service_symptom
+												, A.service_reservation
+												, A.user_no	
+												, U.user_name			
+												, U.user_phone			
+												, U.user_address		
+												, A.employee_no				
+												, E.employee_name		
+												, A.center_id		
+												, C.center_name			
+												, A.service_id			
+												, S.service_status			
+												, A.type_id			
+												, T.type_name			
+											from
+												sc_afterservice A, service_status S, service_type T, sc_user U, sc_employee E, sc_center C
+											where
+												A.service_id = S.service_id
+											AND
+												A.type_id = T.type_id
+											AND
+												A.user_no = U.user_no
+											AND
+												A.employee_no = E.employee_no
+											AND
+												A.center_id = C.center_id
+											AND 
+												U.user_no = #{userNo}) J
+		where 
+			rn >= #{beginIndex} and rn &lt;= #{endIndex}
+	</select>
+	
+	<select id="getServiceByEngineerId" parameterType="ServiceCriteria" resultType="Service">
+		<if test="totalRows != null">
+		select
+			*
+		from(
+		</if>
+			select
+				row_number() over (order by service_reservation desc) as rn
+				, A.service_no				as "no"
+				, A.service_symptom			as "symptom"
+				, A.service_reservation		as "reservation"
+				, A.user_no					as "user.no"
+				, A.employee_no				as "employee.no"
+				, A.center_id				as "center.id"
+				, A.division_id				as "division.id"
+				, A.service_id				as "serviceStatus.id"
+				, S.service_status			as "serviceStatus.status"
+				, A.type_id					as "serviceType.id"
+				, A.service_address			as "address"
+			from
+				sc_afterservice A, service_status S
+			where
+				A.employee_no = #{engineerNo}
+			AND
+				A.service_id = S.service_id
+				<if test="reservation != null">
+					AND A.service_reservation >= #{reservation}
+				</if>
+		<if test="totalRows != null">
+		)
+		where rn >= #{beginIndex} and rn &lt;= #{endIndex} 
+		</if>
+	</select>
+	
+	<insert id="addAfterService" parameterType="Service">
+		insert into sc_afterservice 
+			(service_no, service_symptom, service_reservation, user_no, employee_no, center_id, division_id, service_id, type_id, service_address)
+		values
+			(#{no}, #{symptom}, #{reservation}, #{user.no}, #{employee.no}, #{center.id}, #{division.id}, #{serviceStatus.id}, #{serviceType.id}, #{address, jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="updateAfterServiceComplete" parameterType="Service">
+		update sc_afterservice
+		set
+			service_id = #{serviceStatus.id}
+		where
+			service_no = #{no}
+	</update>
+	
+</mapper>

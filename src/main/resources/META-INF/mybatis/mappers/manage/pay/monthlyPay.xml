@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.pay.MonthlyPayMapper">
+	
+	<select id="getMonthlyPayByMonth" parameterType="string" resultType="MonthlyPay">
+		select
+			P.pay_no				as "no",
+			P.pay_month				as "payMonth",
+			P.month_pay				as "pay",
+			A.employee_no			as "employee.no",
+			A.employee_password		as "employee.password",
+			A.employee_email		as "employee.email",
+			A.employee_salary		as "employee.salary",
+			A.employee_name			as "employee.name",
+			A.employee_phone		as "employee.phone",
+			A.employee_hiredate		as "employee.hiredate",
+			A.employee_work			as "employee.work",
+			A.center_id				as "employee.center.id",
+			A.dept_id				as "department.id",
+			A.employee_pic_path	 	as "employee.pic",
+			A.position_id			as "employee.position.id", 
+			C.center_name           as "employee.center.name",
+			B.dept_name             as "employee.department.name",
+			D.position_name         as "employee.position.name"
+		from
+        	sc_employee A , sc_department B, sc_center C, sc_position D, monthly_pay P
+		where
+			P.employee_no = A.employee_no
+		and
+			A.dept_id = B.dept_id
+		and
+			A.center_id = C.center_id
+		and
+			A.position_id = D.position_id
+		and
+			to_char(P.pay_month, 'YYYY-MM') = #{value}
+		order by
+			P.employee_no
+	</select>
+	
+	<select id="getMonthlyPayByCriteria" parameterType="PayChangeCriteria" resultType="MonthlyPay">
+		select
+			P.pay_no				as "no",
+			P.pay_month				as "payMonth",
+			P.month_pay				as "pay",
+			A.employee_no			as "employee.no",
+			A.employee_password		as "employee.password",
+			A.employee_email		as "employee.email",
+			A.employee_salary		as "employee.salary",
+			A.employee_name			as "employee.name",
+			A.employee_phone		as "employee.phone",
+			A.employee_hiredate		as "employee.hiredate",
+			A.employee_work			as "employee.work",
+			A.center_id				as "employee.center.id",
+			A.dept_id				as "department.id",
+			A.employee_pic_path	 	as "employee.pic",
+			A.position_id			as "employee.position.id", 
+			C.center_name           as "employee.center.name",
+			B.dept_name             as "employee.department.name",
+			D.position_name         as "employee.position.name"
+		from
+        	sc_employee A , sc_department B, sc_center C, sc_position D, monthly_pay P
+		where
+			P.employee_no = A.employee_no
+		and
+			A.dept_id = B.dept_id
+		and
+			A.center_id = C.center_id
+		and
+			A.position_id = D.position_id
+		and
+			to_char(P.pay_month, 'YYYY-MM') = #{month}
+		and
+			P.employee_no = #{empNo}
+		order by
+			P.employee_no
+	</select>
+	
+	<insert id="addMonthlyPay" parameterType="MonthlyPay">
+		insert into monthly_pay
+		(pay_no, pay_month, month_pay, employee_no)
+		values
+		(seq_pay.nextval, sysdate, #{pay}, #{employee.no})
+	</insert>
+	
+</mapper>

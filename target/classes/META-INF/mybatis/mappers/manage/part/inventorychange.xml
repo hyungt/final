@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.part.InventoryChangeMapper">
+	<insert id="changeInventory" parameterType="InventoryChange">
+		insert into Inventory_Change
+			(CHANGE_NO, CHANGE_QTY, PART_NO)
+		values
+			(SEQ_INVEN_CHANGE.nextval, #{qty}, #{part.no})
+	</insert>
+</mapper>

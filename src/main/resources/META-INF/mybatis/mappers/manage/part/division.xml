@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.part.DivisionMapper">
+	<select id="getDivisions" parameterType="string" resultType="Division">
+		select
+			A.DIVISION_ID	id,
+			A.DIVISION_NAME	name
+		from
+			SC_DIVISION A, SC_CATEGORY B
+		where
+			A.CATEGORY_ID = B.CATEGORY_ID
+		<if test="_parameter == 'CAT-PH'">
+			and
+				A.CATEGORY_ID = #{_parameter}
+		</if>
+		<if test="_parameter == 'CAT-COM'">
+			and
+				A.CATEGORY_ID = #{_parameter}
+		</if>
+		<if test="_parameter == 'CAT-AP'">
+			and
+				A.CATEGORY_ID = #{_parameter}
+		</if>
+		<if test="_parameter == 'CAT-WE'">
+			and
+				A.CATEGORY_ID = #{_parameter}
+		</if>
+		<if test="_parameter == 'CAT-SD'">
+			and
+				A.CATEGORY_ID = #{_parameter}
+		</if>
+		order by
+			A.DIVISION_ID asc
+	</select>
+	<select id="getDivisionById" parameterType="string" resultType="Division">
+		select
+			DIVISION_ID		id,
+			DIVISION_NAME	name,
+			CATEGORY_ID		"category.id"
+		from
+			SC_DIVISION
+		where
+			DIVISION_ID = #{value}
+	</select>
+</mapper>

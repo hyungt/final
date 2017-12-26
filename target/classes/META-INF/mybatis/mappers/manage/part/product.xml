@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ese.mappers.manage.part.ProductMapper">
+	<select id="getAllProduct" resultType="Product">
+		select
+			PRODUCT_ID		id,
+			PRODUCT_NAME	name,
+			DIVISION_ID		"division.id"
+		from
+			PRODUCT_INFO
+		order by
+			PRODUCT_ID
+	</select>
+	<select id="getProducts" parameterType="string" resultType="Product">
+		select
+			PRODUCT_ID		id,
+			PRODUCT_NAME	name,
+			DIVISION_ID		"division.id"
+		from
+			PRODUCT_INFO
+		where
+			DIVISION_ID = #{value}
+		order by
+			PRODUCT_ID
+	</select>
+</mapper>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+ 	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.ese.mappers.notice.EmployeeNoticeMapper">
+
+	<select id="getTotalRows" parameterType="Pagination" resultType="int">
+		select
+			count(*)
+		from
+			employee_notice
+		<where>
+			<if test="keyword != ''">
+				<choose>
+					<when test="opt == 'title'">
+						and notice_title like '%' || #{keyword} || '%'
+					</when>
+					<when test="opt == 'contents'">
+						and notice_contents like '%' || #{keyword} || '%'
+					</when>
+				</choose>
+			</if>
+		</where>
+	</select>
+	
+	<select id="getAllBoards" parameterType="Pagination" resultType="EmployeeNotice">
+		select
+			notice_no			as no,
+			notice_title		as title,
+			notice_contents		as contents,
+			notice_createdate	as createdate,
+			notice_count		as count
+		from 
+			(
+			select
+				row_number() over (order by notice_no desc) rn,
+				notice_no,
+				notice_title,
+				notice_contents,
+				notice_createdate,
+				notice_count
+			from
+				employee_notice
+			<where>
+				<if test="keyword != ''">
+					<choose>
+						<when test="opt == 'title'">
+							and notice_title like '%' || #{keyword} || '%'
+						</when>
+						<when test="opt == 'contents'">
+							and notice_contents like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</if>
+			</where>
+			)
+		where rn >= #{beginIndex} and rn &lt;= #{endIndex}
+	</select>
+	
+	<insert id="addBoard" parameterType="EmployeeNotice">
+		insert into employee_notice
+			(notice_no, notice_title, notice_contents, notice_createdate, notice_count)
+		values
+			(seq_emp_notice.nextval, #{title}, #{contents}, sysdate, 0)
+	</insert>
+	
+	<select id="getBoardByNo" parameterType="int" resultType="EmployeeNotice">
+		select
+			notice_no			as no,
+			notice_title		as title,
+			notice_contents		as contents,
+			notice_createdate	as createdate,
+			notice_count		as count
+		from
+			employee_notice
+		where
+			notice_no = #{value}
+	</select>
+	<update id="updateBoard" parameterType="EmployeeNotice">
+		update employee_notice
+		<set>
+			<if test="title != null">notice_title = #{title},</if>
+			<if test="contents != null">notice_contents = #{contents},</if>
+			<if test="count != null">notice_count = #{count},</if>
+		</set>
+		where
+			notice_no = #{no}
+	</update>
+	
+	<select id="getTwoRows" resultType="EmployeeNotice">
+		select
+			notice_no			as no,
+			notice_title		as title,
+			notice_contents		as contents,
+			notice_createdate	as createdate
+		from
+			(select
+				notice_no,
+				notice_title,
+				notice_contents	,
+				notice_createdate,
+				row_number() over (order by notice_no desc) rn
+			from
+				employee_notice)
+		where
+			rn &lt;= 2
+	</select>
+</mapper>

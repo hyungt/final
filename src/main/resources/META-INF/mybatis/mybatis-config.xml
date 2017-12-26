@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	
+	<typeAliases>
+		<!-- 성우 -->
+		<typeAlias alias="Employee" type="com.ese.vo.hr.Employee"/>
+		<typeAlias alias="User" type="com.ese.vo.User"/>
+		<typeAlias alias="BreakSign" type="com.ese.vo.hr.BreakSign"/>
+		<typeAlias alias="Suggest" type="com.ese.vo.notice.Suggest"/>
+		<typeAlias alias="DownloadNotice" type="com.ese.vo.notice.DownloadNotice"/>
+		<typeAlias alias="FileAttach" type="com.ese.vo.notice.FileAttach"/>
+		
+		<!-- 인선 -->
+		<typeAlias alias="Category" type="com.ese.vo.Category"/>
+		<typeAlias alias="Division" type="com.ese.vo.Division"/>
+		<typeAlias alias="Part" type="com.ese.vo.part.Part"/>
+		<typeAlias alias="Status" type="com.ese.vo.part.PartStatus"/>
+		<typeAlias alias="Product" type="com.ese.vo.product.Product"/>
+		<typeAlias alias="PartUsingModel" type="com.ese.vo.product.PartUsingModel"/>
+		<typeAlias alias="InventoryChange" type="com.ese.vo.part.InventoryChange"/>
+		<typeAlias alias="Order" type="com.ese.vo.order.Order"/>
+		<typeAlias alias="OrderStatus" type="com.ese.vo.order.OrderStatus"/>
+		<typeAlias alias="PartCriteria" type="com.ese.vo.common.PartCriteria"/>
+		<typeAlias alias="OrderCriteria" type="com.ese.vo.common.OrderCriteria"/>
+		<typeAlias alias="DownNoticeCriteria" type="com.ese.vo.common.DownNoticeCriteria"/>
+		<typeAlias alias="Appraisal" type="com.ese.vo.order.Apparaisal"/>
+		<!-- /////////////////// -->
+		
+		<!-- 은택 -->
+		<typeAlias alias="CustomerNotice" type="com.ese.vo.notice.CustomerNotice"/>
+		<typeAlias alias="EmployeeNotice" type="com.ese.vo.notice.EmployeeNotice"/>
+		<typeAlias alias="Pagination" type="com.ese.vo.pagination.notice.Pagination"/>
+		
+		<!-- 형택 -->
+		<typeAlias alias="Center" type="com.ese.vo.afterservice.Center"/>
+		<typeAlias alias="City" type="com.ese.vo.afterservice.City"/>
+		<typeAlias alias="Locale" type="com.ese.vo.afterservice.Locale"/>
+		<typeAlias alias="Break" type="com.ese.vo.hr.Break"/>
+		<typeAlias alias="Service" type="com.ese.vo.afterservice.AfterService"/>
+		<typeAlias alias="ServiceCriteria" type="com.ese.vo.common.ServiceCriteria"/>
+		
+		<typeAlias alias="PayChange" type="com.ese.vo.pay.PayChange"/>
+		<typeAlias alias="PayChangeType" type="com.ese.vo.pay.PayChangeType"/>
+		<typeAlias alias="RepairInfo" type="com.ese.vo.afterservice.RepairInfo"/>
+		<typeAlias alias="ServiceResult" type="com.ese.vo.afterservice.ServiceResult"/>
+		<typeAlias alias="UsingPart" type="com.ese.vo.afterservice.UsingPart"/>
+		<typeAlias alias="PayChangeCriteria" type="com.ese.vo.common.PayChangeCriteria"/>
+		<typeAlias alias="MonthlyPay" type="com.ese.vo.pay.MonthlyPay"/>
+		<typeAlias alias="OtherPay" type="com.ese.vo.pay.OtherPay"/>
+		<typeAlias alias="ChartResult" type="com.ese.vo.common.PayChangeChartResult"/>
+		<!-- ///////////////////////////////// -->
+		
+		<!-- 승용 -->
+		<typeAlias alias="BreakSign" type="com.ese.vo.hr.BreakSign" />
+		<typeAlias alias="UserOrderCriteria" type="com.ese.vo.common.UserOrderCriteria"/>
+		<typeAlias alias="UseServiceCriteria" type="com.ese.vo.common.UseServiceCriteria"/>
+		<typeAlias alias="ServiceResult" type="com.ese.vo.afterservice.ServiceResult"/>
+		<typeAlias alias="UsingPart" type="com.ese.vo.afterservice.UsingPart"/>
+		<typeAlias alias="DayResult" type="com.ese.vo.pay.BalanceAccount"/>
+		<typeAlias alias="DayResultCriteria" type="com.ese.vo.common.DayResultCriteria"/>
+		<!-- /////////////////////////// -->
+	</typeAliases>
+
+	<typeHandlers>
+		<typeHandler handler="com.ese.common.mappers.typeHandler.CLOBHandler" javaType="String" jdbcType="LONGVARCHAR"/>
+	</typeHandlers>
+
+	<mappers>
+		<mapper resource="META-INF/mybatis/mappers/employee.xml" />
+		<mapper resource="META-INF/mybatis/mappers/engineer.xml" />
+		<mapper resource="META-INF/mybatis/mappers/user.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/personnel/breakApply.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/part/part.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/part/category.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/part/division.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/part/status.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/part/product.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/part/partusingmodel.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/part/inventorychange.xml" />
+		<mapper resource="META-INF/mybatis/mappers/notice/customer/board.xml" />
+		<mapper resource="META-INF/mybatis/mappers/notice/employee/board.xml" />
+		<mapper resource="META-INF/mybatis/mappers/suggest/board.xml" />
+		<mapper resource="META-INF/mybatis/mappers/notice/download/board.xml" />
+		<mapper resource="META-INF/mybatis/mappers/servicecenter/center.xml" />
+		<mapper resource="META-INF/mybatis/mappers/servicecenter/location.xml" />
+		<mapper resource="META-INF/mybatis/mappers/servicecenter/servicereserve.xml" />
+		<mapper resource="META-INF/mybatis/mappers/servicecenter/order.xml" />
+		<mapper resource="META-INF/mybatis/mappers/servicecenter/appraisal.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/pay/paychange.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/pay/monthlyPay.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/pay/otherpay.xml" />
+		<mapper resource="META-INF/mybatis/mappers/manage/pay/dayresult.xml" />
+		<mapper resource="META-INF/mybatis/mappers/serviceresult/serviceresult.xml" />
+		<mapper resource="META-INF/mybatis/mappers/serviceresult/repairinfo.xml" />
+		<mapper resource="META-INF/mybatis/mappers/serviceresult/usingpart.xml" />
+		<mapper resource="META-INF/mybatis/mappers/download/upload.xml" />
+	</mappers>
+	
+</configuration>
